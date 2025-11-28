@@ -1,0 +1,19 @@
+Ignore Mac junk files
+
+__MACOSX/
+.DS_Store
+
+Ignore compiled simulation files
+
+*.out
+*.vcd
+a.out
+sim_output
+
+Ignore VS Code local settings
+
+.vscode/
+
+Ignore backups
+
+*.bak
