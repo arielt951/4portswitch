@@ -4,30 +4,70 @@ module switch_port (
   input  logic        valid_in,
   input  logic [3:0]  source_in,
   input  logic [3:0]  target_in,
+  input  logic        grant,
   input  logic [7:0]  data_in,
+  input  logic [15:0]  data_in0,
+  input  logic [15:0]  data_in1,
+  input  logic [15:0]  data_in2,
+  input  logic [15:0]  data_in3,
+  //4:1 mux interface
+  input  logic [1:0] mux_select,
+  
   output logic        valid_out,
   output logic [3:0]  source_out,
   output logic [3:0]  target_out,
   output logic [7:0]  data_out
 );
+wire fifo_full;
+wire fifo_empty;
+wire [15:0] fifo_data_out;
+wire [7:0] header_out;
+wire [15:0] data_out_mux;
 
 // State Encoding
 // IDLE - 00 , ROUTE - 01 , ARB_WAIT - 10 , TRANSMIT - 11
 typedef enum logic [1:0] {IDLE, ROUTE, ARB_WAIT, TRANSMIT} state;
 state current_state, next_state;
+// Packet Type Encoding ERR - 00 , SDP - 01 , MDP - 10 , BDP - 11
+typedef enum logic [1:0] {ERR, SDP, MDP, BDP} p_type;
+p_type Packet_Type;
 
-if (!rst_n) begin
-  valid_out  <= 0;
-  source_out <= 0;
-  target_out <= 0;
-  data_out   <= 0;
-end else begin
-  // Simple pass-through logic for demonstration
-  valid_out  <= valid_in;
-  source_out <= source_in;
-  target_out <= target_in;
-  data_out   <= data_in;
-end
+module fifo #(.PKT_SIZE(16),.DEPTH(8)) 
+port_fifo (
+    .rst_n(rst_n),
+    .clk(clk),
+    .data_in({source_in, target_in, data_in}),
+    .wr_en(valid_in),
+    .fifo_full(fifo_full),
+    .header_out(header_out), // for parser
+    .rd_en(grant), // grant from arbiter enables read
+    .data_out(fifo_data_out),
+    .fifo_empty(fifo_empty)
+);
+
+module parser (
+  //TODO add parser logic, reades header as input verify packet_type, drop invalid packets and output header (later integration to arbiter)
+);
+endmodule
+case (mux_select)
+  2'b00: begin
+      assign data_out_mux = data_in0;
+  end
+  2'b01: begin
+      assign data_out_mux = data_in1;
+  end
+  2'b10: begin
+      assign data_out_mux = data_in2;
+  end
+  2'b11: begin
+      assign data_out_mux = data_in3;
+  end
+  default: begin
+      assign data_out_mux = '0;
+  end
+
+assign {source_out, target_out, data_out} = data_out_mux; 
+
 // Implement FSM for packet flow
 // Handle clock/reset
 // Implement routing logic
