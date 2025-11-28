@@ -32,6 +32,7 @@ state current_state, next_state;
 typedef enum logic [1:0] {ERR, SDP, MDP, BDP} p_type;
 p_type Packet_Type;
 
+//fifo instance
 module fifo #(.PKT_SIZE(16),.DEPTH(8)) 
 port_fifo (
     .rst_n(rst_n),
@@ -44,27 +45,35 @@ port_fifo (
     .data_out(fifo_data_out),
     .fifo_empty(fifo_empty)
 );
+endmodule
 
 module parser (
   //TODO add parser logic, reades header as input verify packet_type, drop invalid packets and output header (later integration to arbiter)
 );
 endmodule
-case (mux_select)
-  2'b00: begin
-      assign data_out_mux = data_in0;
-  end
-  2'b01: begin
-      assign data_out_mux = data_in1;
-  end
-  2'b10: begin
-      assign data_out_mux = data_in2;
-  end
-  2'b11: begin
-      assign data_out_mux = data_in3;
-  end
-  default: begin
-      assign data_out_mux = '0;
-  end
+
+// 4:1 MUX to select data output based on arbiter mux_select
+always_comb begin
+    case (mux_select)
+        2'b00: begin
+            data_out_mux = data_in0;
+        end
+        2'b01: begin
+            data_out_mux = data_in1;
+        end
+        2'b10: begin
+            data_out_mux = data_in2;
+        end
+        2'b11: begin
+            data_out_mux = data_in3;
+        end
+        default: begin
+            data_out_mux = '0;
+        end
+    endcase
+end   
+
+
 
 assign {source_out, target_out, data_out} = data_out_mux; 
 
