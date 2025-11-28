@@ -8,8 +8,8 @@ module fifo#(
     input logic [PKT_SIZE - 1 : 0] data_in,
     input logic wr_en,
     output logic fifo_full,
-    //inspect logic
-    output logic [(PKT_SIZE >> 2) - 1 : 0] header_out,
+    //inspect logic - for packet patser
+    output logic [(PKT_SIZE >> 1) - 1 : 0] header_out,
     //read logic
     input logic rd_en,
     output logic [PKT_SIZE - 1 : 0] data_out,
@@ -21,9 +21,11 @@ localparam PTR_BWIDTH = $clog2(DEPTH); // pointer bit width
 //memory array
 logic [PKT_SIZE - 1 : 0] mem [ DEPTH - 1 : 0];
 //FIFO pointers
-logic [PTR_BWIDTH -1 : 0] wr_ptr, rd_ptr, inspect_ptr;
+logic [PTR_BWIDTH -1 : 0] wr_ptr, rd_ptr;
 logic [PTR_BWIDTH : 0] fifo_count;
 
+//inspection logic for packet parser no matter of arbitration granted
+assign header_out = (!fifo_empty) ? mem[rd_ptr][PKT_SIZE-1 : PKT_SIZE-8] : '0;
 
 //FIFO LOGIC    
 always_ff @(posedge clk or negedge rst_n) begin
@@ -55,6 +57,9 @@ always_ff @(posedge clk or negedge rst_n) begin
             end
  end
 end
+
+//inspection logic for packet parser on every clock cycle not matter of arbitration granted
+
 
 assign fifo_full  = (fifo_count == DEPTH);
 assign fifo_empty = (fifo_count == 0);
