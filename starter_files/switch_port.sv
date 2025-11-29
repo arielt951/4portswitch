@@ -121,7 +121,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         Packet_Type   <= ERR; // Reset packet type
     end else begin
         current_state <= next_state;
-        
         // Latch Packet_Type only when we decide the packet is valid in ROUTE state
         if (current_state == ROUTE && parser_valid) begin
             Packet_Type <= parser_pkt_type;
@@ -132,10 +131,9 @@ end
 // 2. Combinational Logic: Next State & Outputs
 always_comb begin
     // Default assignments to prevent latches
-    next_state  = current_state;
-    port_fifo.rd_en = 1'b0; // Don't read from FIFO unless specified
+    next_state      = current_state;
     valid_out       = 1'b0; // Don't output data unless transmitting
-    fifo_pop = 1'b0;
+    fifo_pop        = 1'b0;
     
     case (current_state)
         
@@ -159,7 +157,6 @@ always_comb begin
                 next_state = ARB_WAIT; 
             end else begin
                 // Invalid packet: Drop it!
-                // We assert rd_en to 'pop' the bad data out of FIFO
                 fifo_pop = 1'b1;
                 next_state = IDLE;
             end
@@ -174,8 +171,10 @@ always_comb begin
             if (grant) begin
                 next_state = TRANSMIT;
             end
+            else begin
+                next_state = ARB_WAIT;
         end
-
+        end
         // -----------------------------------------------------------------
         // STATE: TRANSMIT
         // Drive data out and pop FIFO
@@ -225,9 +224,9 @@ module parser (
                 // Ensure the classification didn't result in ERR
                 if (pkt_type != ERR) begin
                     pkt_valid = 1'b1;
-                end
+                end 
             end
-        end
+    end
     end
 
 endmodule
