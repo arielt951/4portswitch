@@ -18,6 +18,7 @@ module switch_port (
   input  logic [15:0]  data_in1,
   input  logic [15:0]  data_in2,
   input  logic [15:0]  data_in3,
+  input logic arb_active, // New Input from Arbiter
   //4:1 mux interface
   input  logic [1:0] mux_select,
   
@@ -25,6 +26,7 @@ module switch_port (
   output logic [3:0]  source_out,
   output logic [3:0]  target_out,
   output logic [7:0]  data_out
+  
 );
 logic fifo_full;
 logic fifo_empty;
@@ -50,7 +52,7 @@ logic [3:0] fifo_source;
 logic [3:0] fifo_target;
 logic [7:0] fifo_payload;
 
-// Unpack the FIFO data based on your write order: {source, target, data}
+// Unpack the FIFO data based on your write order: {data, target, source}
 assign fifo_source  = fifo_data_out[3:0];
 assign fifo_target  = fifo_data_out[7:4];
 assign fifo_payload = fifo_data_out[15:8];
@@ -86,25 +88,31 @@ fifo #(.PKT_SIZE(16),.DEPTH(8)) port_fifo (
 
 // 4:1 MUX to select data output based on arbiter mux_select
 always_comb begin
-    case (mux_select)
-        2'b00: begin // Select data from port 0
-            data_out_mux = data_in0;
-        end
-        2'b01: begin // Select data from port 1
-            data_out_mux = data_in1;
-        end
-        2'b10: begin // Select data from port 2
-            data_out_mux = data_in2;
-        end
-        2'b11: begin // Select data from port 3
-            data_out_mux = data_in3;
-        end
-        default: begin // Default value is low
-            data_out_mux = '0;
-        end
-    endcase
-end   
+    data_out_mux = '0; 
+    valid_out    = 1'b0; // Default 0
 
+    // Only open the gate if the Arbiter says we have a winner
+    if (arb_active) begin
+        case (mux_select)
+            2'b00: begin 
+                data_out_mux = data_in0; 
+                valid_out    = grant; 
+            end
+            2'b01: begin 
+                data_out_mux = data_in1; 
+                valid_out    = grant; 
+            end
+            2'b10: begin 
+                data_out_mux = data_in2; 
+                valid_out    = grant; 
+            end
+            2'b11: begin 
+                data_out_mux = data_in3; 
+                valid_out    = grant; 
+            end
+        endcase
+    end
+end
 
 
 assign {source_out, target_out, data_out} = data_out_mux; 
@@ -180,7 +188,7 @@ always_comb begin
         // Drive data out and pop FIFO
         // -----------------------------------------------------------------
         TRANSMIT: begin
-            valid_out = 1'b1;       // Signal that data_out is valid
+            //valid_out = 1'b1;       // Signal that data_out is valid
             fifo_pop = 1'b1; // Pop the packet from FIFO
             next_state = IDLE;      // Return to IDLE
         end
