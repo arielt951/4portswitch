@@ -18,11 +18,11 @@ module switch_port (
   output logic [3:0]  target_out,
   output logic [7:0]  data_out
 );
-wire fifo_full;
-wire fifo_empty;
-wire [15:0] fifo_data_out;
-wire [7:0] header_out;
-wire [15:0] data_out_mux;
+logic fifo_full;
+logic fifo_empty;
+logic [15:0] fifo_data_out;
+logic [7:0] header_out;
+logic [15:0] data_out_mux;
 
 // State Encoding
 // IDLE - 00 , ROUTE - 01 , ARB_WAIT - 10 , TRANSMIT - 11
@@ -32,42 +32,43 @@ state current_state, next_state;
 typedef enum logic [1:0] {ERR, SDP, MDP, BDP} p_type;
 p_type Packet_Type;
 
-//fifo instance
-module fifo #(.PKT_SIZE(16),.DEPTH(8)) 
-port_fifo (
-    .rst_n(rst_n),
-    .clk(clk),
-    .data_in({source_in, target_in, data_in}),
-    .wr_en(valid_in),
-    .fifo_full(fifo_full),
-    .header_out(header_out), // for parser
-    .rd_en(grant), // grant from arbiter enables read
-    .data_out(fifo_data_out),
-    .fifo_empty(fifo_empty)
-);
-endmodule
-
 module parser (
   //TODO add parser logic, reades header as input verify packet_type, drop invalid packets and output header (later integration to arbiter)
 );
 endmodule
 
+//fifo instance
+fifo #(.PKT_SIZE(16),.DEPTH(8)) port_fifo (
+  //inputs
+    .rst_n      (rst_n),
+    .clk        (clk),
+    .data_in    ({source_in, target_in, data_in}),
+    .wr_en      (valid_in),
+    .rd_en      (grant), // grant from arbiter enables read
+    //outputs
+    .data_out   (fifo_data_out),
+    .fifo_full  (fifo_full),
+    .header_out (header_out), // for parser
+    .fifo_empty (fifo_empty)
+);
+
+
 // 4:1 MUX to select data output based on arbiter mux_select
 always_comb begin
     case (mux_select)
-        2'b00: begin
+        2'b00 begin // Select data from port 0
             data_out_mux = data_in0;
         end
-        2'b01: begin
+        2'b01: begin // Select data from port 1
             data_out_mux = data_in1;
         end
-        2'b10: begin
+        2'b10: begin // Select data from port 2
             data_out_mux = data_in2;
         end
-        2'b11: begin
+        2'b11: begin // Select data from port 3
             data_out_mux = data_in3;
         end
-        default: begin
+        default: begin // Default value is low
             data_out_mux = '0;
         end
     endcase
