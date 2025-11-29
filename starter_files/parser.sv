@@ -30,7 +30,10 @@ module parser (
                     pkt_valid = 1'b1;
                 end 
             end
-    end
+        end else begin
+            pkt_type  = ERR;
+            pkt_valid = 1'b0;
+        end
     end
 
 endmodule

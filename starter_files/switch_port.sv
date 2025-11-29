@@ -1,3 +1,5 @@
+`include "FIFO.sv"
+`include "parser.sv"
 
 
 // IDLE - 00 , ROUTE - 01 , ARB_WAIT - 10 , TRANSMIT - 11
@@ -12,18 +14,10 @@ module switch_port (
   input  logic        valid_in,
   input  logic [3:0]  source_in,
   input  logic [3:0]  target_in,
-  input  logic        grant,
   input  logic [7:0]  data_in,
-  input  logic [15:0]  data_in0,
-  input  logic [15:0]  data_in1,
-  input  logic [15:0]  data_in2,
-  input  logic [15:0]  data_in3,
-  input logic arb_active, // New Input from Arbiter
-  //4:1 mux interface
-  input  logic [1:0] mux_select,
-  
+  input  logic        grant,
+  //4:1 mux interface  
   output logic [3:0] pkt_dst, //to arbiter
-  output logic        valid_out,
   output logic [3:0]  source_out,
   output logic [3:0]  target_out,
   output logic [7:0]  data_out
@@ -32,33 +26,29 @@ logic fifo_full;
 logic fifo_empty;
 logic [15:0] fifo_data_out;
 logic [7:0] header_out;
-logic [15:0] data_out_mux;
 
 // State Encoding
-
 state current_state, next_state;
-
 p_type Packet_Type;
-
-
 // Internal signals for Parser connection
 p_type pkt_type;
 logic  pkt_valid;
 // internal control wire which connects between the fifo, arbiter and FSM
 logic fifo_pop;
     
-// -----------------------------------------------------------
 // Parser Instantiation
 parser parser_inst (
     //inputs
-    .source    (header_out[7:4]), // Connect to FIFO header output
-    .target    (header_out[3:0]), // Connect to FIFO header output
+    .source    (header_out[7:4]), 
+    .target    (header_out[3:0]), 
     //outputs
     .pkt_type  (pkt_type),
     .pkt_valid (pkt_valid)
 );
 assign pkt_dst = header_out[3:0]; //target for arbiter
 
+assign fifo_pop = grant; // grant from arbiter enables read
+assign fifo_data_out = {data_out, target_out, source_out};
 //fifo instance
 fifo #(.PKT_SIZE(16),.DEPTH(8)) port_fifo (
   //inputs
@@ -74,37 +64,6 @@ fifo #(.PKT_SIZE(16),.DEPTH(8)) port_fifo (
     .fifo_empty (fifo_empty)
 );
 
-
-// 4:1 MUX to select data output based on arbiter mux_select
-always_comb begin
-    data_out_mux = '0; 
-    valid_out    = 1'b0; // Default 0
-
-    // Only open the gate if the Arbiter says we have a winner
-    if (arb_active) begin
-    case (mux_select)
-            2'b00: begin 
-            data_out_mux = data_in0;
-                valid_out    = grant; 
-        end
-            2'b01: begin 
-            data_out_mux = data_in1;
-                valid_out    = grant; 
-        end
-            2'b10: begin 
-            data_out_mux = data_in2;
-                valid_out    = grant; 
-        end
-            2'b11: begin 
-            data_out_mux = data_in3;
-                valid_out    = grant; 
-        end
-    endcase
-end   
-end
-
-
-assign {source_out, target_out, data_out} = data_out_mux; 
 
 // Implement FSM for packet flow
 // -----------------------------------------------------------
@@ -178,8 +137,7 @@ always_comb begin
         // Drive data out and pop FIFO
         // -----------------------------------------------------------------
         TRANSMIT: begin
-            //valid_out = 1'b1;       // Signal that data_out is valid
-            fifo_pop = 1'b1; // Pop the packet from FIFO
+            fifo_pop = grant; // Pop the packet from FIFO
             next_state = IDLE;      // Return to IDLE
         end 
 
