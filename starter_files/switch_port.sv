@@ -21,6 +21,7 @@ module switch_port (
   //4:1 mux interface
   input  logic [1:0] mux_select,
   
+  output logic [3:0] pkt_dst, //to arbiter
   output logic        valid_out,
   output logic [3:0]  source_out,
   output logic [3:0]  target_out,
@@ -40,33 +41,22 @@ p_type Packet_Type;
 
 
 // Internal signals for Parser connection
-p_type parser_pkt_type;
-logic  parser_valid;
+p_type pkt_type;
+logic  pkt_valid;
 // internal control wire which connects between the fifo, arbiter and FSM
 logic fifo_pop;
     
-// Wires to unpack the FIFO output
-logic [3:0] fifo_source;
-logic [3:0] fifo_target;
-logic [7:0] fifo_payload;
-
-// Unpack the FIFO data based on your write order: {source, target, data}
-assign fifo_source  = fifo_data_out[3:0];
-assign fifo_target  = fifo_data_out[7:4];
-assign fifo_payload = fifo_data_out[15:8];
-
 // -----------------------------------------------------------
 // Parser Instantiation
-// -----------------------------------------------------------
 parser parser_inst (
-    .source    (fifo_source),
-    .target    (fifo_target),
-    .pkt_type  (parser_pkt_type),
-    .pkt_valid (parser_valid)
+    //inputs
+    .source    (header_out[7:4]), // Connect to FIFO header output
+    .target    (header_out[3:0]), // Connect to FIFO header output
+    //outputs
+    .pkt_type  (pkt_type),
+    .pkt_valid (pkt_valid)
 );
-
-
-
+assign pkt_dst = header_out[3:0]; //target for arbiter
 
 //fifo instance
 fifo #(.PKT_SIZE(16),.DEPTH(8)) port_fifo (
@@ -113,7 +103,6 @@ assign {source_out, target_out, data_out} = data_out_mux;
 // -----------------------------------------------------------
 // FSM LOGIC
 // -----------------------------------------------------------
-
 // 1. Sequential Logic: State Updates
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -122,8 +111,8 @@ always_ff @(posedge clk or negedge rst_n) begin
     end else begin
         current_state <= next_state;
         // Latch Packet_Type only when we decide the packet is valid in ROUTE state
-        if (current_state == ROUTE && parser_valid) begin
-            Packet_Type <= parser_pkt_type;
+        if (current_state == ROUTE && pkt_valid) begin
+            Packet_Type <= pkt_type;
         end
     end
 end
@@ -152,7 +141,7 @@ always_comb begin
         // Check Parser output. If valid -> Wait for Grant. If Bad -> Drop.
         // -----------------------------------------------------------------
         ROUTE: begin
-            if (parser_valid) begin
+            if (pkt_valid) begin
                 // Valid packet: Move to Arbitration Wait
                 next_state = ARB_WAIT; 
             end else begin
@@ -194,39 +183,3 @@ end
 
 endmodule
 
-module parser (
-    input  logic [3:0] source,
-    input  logic [3:0] target,
-    
-    output p_type      pkt_type,
-    output logic       pkt_valid
-);
-
-    always_comb begin
-        // 1. Default assignments
-        pkt_type  = ERR;
-        pkt_valid = 1'b0;
-
-        // 2. Check Source Validity (Must be One-Hot)
-        if ($countones(source) == 1 && target != 4'b0000) begin
-            
-            // 3. Classify Packet Type based on bit count
-            case ($countones(target))
-                1:       pkt_type = SDP; // Single
-                2, 3:    pkt_type = MDP; // Multicast
-                4:       pkt_type = BDP; // Broadcast
-                default: pkt_type = ERR;
-            endcase
-
-            // 4. Validate Logic (The Fix)
-            // Valid if: (No Overlap) OR (It is Broadcast)
-            if ( ((target & source) == 0) || (pkt_type == BDP) ) begin
-                // Ensure the classification didn't result in ERR
-                if (pkt_type != ERR) begin
-                    pkt_valid = 1'b1;
-                end 
-            end
-    end
-    end
-
-endmodule
