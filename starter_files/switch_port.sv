@@ -27,8 +27,7 @@ module switch_port (
   output logic [3:0]  source_out,
   output logic [3:0]  target_out,
   output logic [7:0]  data_out
-  
-);
+); 
 logic fifo_full;
 logic fifo_empty;
 logic [15:0] fifo_data_out;
@@ -83,25 +82,25 @@ always_comb begin
 
     // Only open the gate if the Arbiter says we have a winner
     if (arb_active) begin
-        case (mux_select)
+    case (mux_select)
             2'b00: begin 
-                data_out_mux = data_in0; 
+            data_out_mux = data_in0;
                 valid_out    = grant; 
-            end
+        end
             2'b01: begin 
-                data_out_mux = data_in1; 
+            data_out_mux = data_in1;
                 valid_out    = grant; 
-            end
+        end
             2'b10: begin 
-                data_out_mux = data_in2; 
+            data_out_mux = data_in2;
                 valid_out    = grant; 
-            end
+        end
             2'b11: begin 
-                data_out_mux = data_in3; 
+            data_out_mux = data_in3;
                 valid_out    = grant; 
-            end
-        endcase
-    end
+        end
+    endcase
+end   
 end
 
 
@@ -141,6 +140,8 @@ always_comb begin
         IDLE: begin
             if (!fifo_empty) begin
                 next_state = ROUTE;
+            end else begin
+                next_state = IDLE;
             end
         end
 
@@ -180,7 +181,7 @@ always_comb begin
             //valid_out = 1'b1;       // Signal that data_out is valid
             fifo_pop = 1'b1; // Pop the packet from FIFO
             next_state = IDLE;      // Return to IDLE
-        end
+        end 
 
         default: next_state = IDLE;
     endcase
