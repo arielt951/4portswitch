@@ -9,7 +9,7 @@ module switch_4port (input logic clk, input logic rst_n,
   logic arb_active;
   logic active0, active1, active2, active3; 
   logic valid_out0, valid_out1, valid_out2, valid_out3;
-  logic [15:0] data_out_mux;
+  logic [ADDR_WIDTH - 1:0] fifo_data_out0, fifo_data_out1, fifo_data_out2, fifo_data_out3;
 
 // Use parameters and DEFINE
 // Modular design with wiring
@@ -26,9 +26,7 @@ switch_port port0_i (
   //outputs
   .pkt_dst      (port0_dst),
   .valid_out    (valid_out0),
-  .source_out   (port0.source_out),
-  .target_out   (port0.target_out),
-  .data_out     (port0.data_out)
+  .fifo_data_out(fifo_data_out0)
 ); 
 
 switch_port port1_i (
@@ -43,9 +41,7 @@ switch_port port1_i (
   //outputs
   .pkt_dst      (port1_dst),
   .valid_out    (valid_out1),
-  .source_out   (port1.source_out),
-  .target_out   (port1.target_out),
-  .data_out     (port1.data_out)
+  .fifo_data_out(fifo_data_out1)
 ); 
 
 switch_port port2_i (
@@ -60,9 +56,7 @@ switch_port port2_i (
   //outputs
   .pkt_dst      (port2_dst),
   .valid_out    (valid_out2),
-  .source_out   (port2.source_out),
-  .target_out   (port2.target_out),
-  .data_out     (port2.data_out)
+  .fifo_data_out(fifo_data_out2)
 ); 
 
 switch_port port3_i (
@@ -77,9 +71,7 @@ switch_port port3_i (
   //outputs
   .pkt_dst      (port3_dst),
   .valid_out    (valid_out3),
-  .source_out   (port3.source_out),
-  .target_out   (port3.target_out),
-  .data_out     (port3.data_out)
+  .fifo_data_out(fifo_data_out3)
 ); 
 
 arbiter top_arb_i (
@@ -106,10 +98,10 @@ arbiter top_arb_i (
 output_mux mux0_i (
   //inputs
     .mux_sel      (mux_sel0),
-    .data_in0     ({port0.data_out, port0.target_out, port0.source_out}),
-    .data_in1     ({port1.data_out, port1.target_out, port1.source_out}),
-    .data_in2     ({port2.data_out, port2.target_out, port2.source_out}),
-    .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
+    .data_in0     (fifo_data_out0),
+    .data_in1     (fifo_data_out1),
+    .data_in2     (fifo_data_out2),
+    .data_in3     (fifo_data_out3),
     .arb_active   (active0),
   //outputs
     .data_out     ({port0.data_out, port0.target_out, port0.source_out}),
@@ -119,10 +111,10 @@ output_mux mux0_i (
 output_mux mux1_i (
   //inputs
     .mux_sel      (mux_sel1),
-    .data_in0     ({port0.data_out, port0.target_out, port0.source_out}),
-    .data_in1     ({port1.data_out, port1.target_out, port1.source_out}),
-    .data_in2     ({port2.data_out, port2.target_out, port2.source_out}),
-    .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
+    .data_in0     (fifo_data_out0),
+    .data_in1     (fifo_data_out1),
+    .data_in2     (fifo_data_out2),
+    .data_in3     (fifo_data_out3),
     .arb_active   (active1),
   //outputs
     .data_out     ({port1.data_out, port1.target_out, port1.source_out}),
@@ -132,10 +124,10 @@ output_mux mux1_i (
 output_mux mux2_i (
   //inputs
     .mux_sel      (mux_sel2),
-    .data_in0     ({port0.data_out, port0.target_out, port0.source_out}),
-    .data_in1     ({port1.data_out, port1.target_out, port1.source_out}),
-    .data_in2     ({port2.data_out, port2.target_out, port2.source_out}),
-    .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
+    .data_in0     (fifo_data_out0),
+    .data_in1     (fifo_data_out1),
+    .data_in2     (fifo_data_out2),
+    .data_in3     (fifo_data_out3),
     .arb_active   (active2),
   //outputs
     .data_out     ({port2.data_out, port2.target_out, port2.source_out}),
@@ -145,10 +137,10 @@ output_mux mux2_i (
 output_mux mux3_i (
   //inputs
     .mux_sel      (mux_sel3),
-    .data_in0     ({port0.data_out, port0.target_out, port0.source_out}),
-    .data_in1     ({port1.data_out, port1.target_out, port1.source_out}),
-    .data_in2     ({port2.data_out, port2.target_out, port2.source_out}),
-    .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
+    .data_in0     (fifo_data_out0),
+    .data_in1     (fifo_data_out1),
+    .data_in2     (fifo_data_out2),
+    .data_in3     (fifo_data_out3),
     .arb_active   (active3),
   //outputs
     .data_out     ({port3.data_out, port3.target_out, port3.source_out}),

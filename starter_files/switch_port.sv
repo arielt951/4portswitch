@@ -10,13 +10,11 @@ module switch_port (
   input  logic        grant,
   //4:1 mux interface  
   output logic [3:0] pkt_dst, //to arbiter
-  output logic [3:0]  source_out,
-  output logic [3:0]  target_out,
-  output logic [7:0]  data_out
+  output logic [15:0] fifo_data_out
+
 ); 
 logic fifo_full;
 logic fifo_empty;
-logic [15:0] fifo_data_out;
 logic [7:0] header_out;
 
 // State Encoding
@@ -26,7 +24,7 @@ p_type Packet_Type;
 p_type pkt_type;
 logic  pkt_valid;
 // internal control wire which connects between the fifo, arbiter and FSM
-logic fifo_pop;
+logic fifo_pop , read_en_fifo;
     
 // Parser Instantiation
 parser parser_inst (
@@ -39,8 +37,6 @@ parser parser_inst (
 );
 assign pkt_dst = header_out[3:0]; //target for arbiter
 
-assign fifo_pop = grant; // grant from arbiter enables read
-assign fifo_data_out = {data_out, target_out, source_out};
 //fifo instance
 fifo port_fifo (
   //inputs
@@ -48,14 +44,14 @@ fifo port_fifo (
     .clk        (clk),
     .data_in    ({data_in, target_in, source_in}),
     .wr_en      (valid_in),
-    .rd_en      (fifo_pop), // grant from arbiter enables read
+    .rd_en      (read_en_fifo), // grant from arbiter enables read
     //outputs
     .data_out   (fifo_data_out),
     .fifo_full  (fifo_full),
     .header_out (header_out), // for parser
     .fifo_empty (fifo_empty)
 );
-
+assign read_en_fifo = (grant || fifo_pop);
 
 // Implement FSM for packet flow
 // -----------------------------------------------------------
@@ -129,7 +125,6 @@ always_comb begin
         // Drive data out and pop FIFO
         // -----------------------------------------------------------------
         TRANSMIT: begin
-            fifo_pop = grant; // Pop the packet from FIFO
             next_state = IDLE;      // Return to IDLE
         end 
 

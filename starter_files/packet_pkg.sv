@@ -9,6 +9,12 @@ typedef enum logic [1:0] {IDLE, ROUTE, ARB_WAIT, TRANSMIT} state;
 // Packet Type Encoding ERR - 00 , SDP - 01 , MDP - 10 , BDP - 11
 typedef enum logic [1:0] {ERR, SDP, MDP, BDP} p_type;
 
+typedef struct packed {
+    logic [3:0] source;
+    logic [3:0] target;
+    logic [7:0] data;
+} packet;
+
   //`include "packet_data.sv"
   //`include "component_base.sv"
   //`include "sequencer.sv"

@@ -22,11 +22,11 @@ logic [DATA_WIDTH - 1 : 0] mem [ DEPTH - 1 : 0];
 logic [PTR_BWIDTH -1 : 0] wr_ptr, rd_ptr;
 logic [PTR_BWIDTH : 0] fifo_count;
 
-//inspection logic for packet parser no matter of arbitration granted
-assign header_out = (!fifo_empty) ? mem[rd_ptr][DATA_WIDTH-1 : DATA_WIDTH-8] : '0;
+//inspection logic for packet parser no matter of arbitration granted, we need to inspect the header
+assign header_out = (!fifo_empty) ? mem[rd_ptr][7:0] : '0; 
 
 //FIFO LOGIC    
-always_ff @(posedge clk or negedge rst_n) begin
+always_ff @(posedge clk or negedge rst_n) begins
     if (!rst_n) begin
     wr_ptr     <=  '0;
     rd_ptr     <=  '0;
