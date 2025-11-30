@@ -1,31 +1,29 @@
-module fifo#(
-    parameter PKT_SIZE = 16, // Source(4) + Target(4) + Data(8)
-    parameter DEPTH    = 8   // Minimum depth to handle 4 concurrent inputs (PKTSIZE x 4)
-)(
+import packet_pkg::*;
+module fifo(
     input logic rst_n,
     input logic clk,
     //write logic
-    input logic [PKT_SIZE - 1 : 0] data_in,
+    input logic [DATA_WIDTH - 1 : 0] data_in,
     input logic wr_en,
     output logic fifo_full,
     //inspect logic - for packet patser
-    output logic [(PKT_SIZE >> 1) - 1 : 0] header_out,
+    output logic [(DATA_WIDTH >> 1) - 1 : 0] header_out,
     //read logic
     input logic rd_en,
-    output logic [PKT_SIZE - 1 : 0] data_out,
+    output logic [DATA_WIDTH - 1 : 0] data_out,
     output logic fifo_empty
 );
 
 localparam PTR_BWIDTH = $clog2(DEPTH); // pointer bit width
 
 //memory array
-logic [PKT_SIZE - 1 : 0] mem [ DEPTH - 1 : 0];
+logic [DATA_WIDTH - 1 : 0] mem [ DEPTH - 1 : 0];
 //FIFO pointers
 logic [PTR_BWIDTH -1 : 0] wr_ptr, rd_ptr;
 logic [PTR_BWIDTH : 0] fifo_count;
 
 //inspection logic for packet parser no matter of arbitration granted
-assign header_out = (!fifo_empty) ? mem[rd_ptr][PKT_SIZE-1 : PKT_SIZE-8] : '0;
+assign header_out = (!fifo_empty) ? mem[rd_ptr][DATA_WIDTH-1 : DATA_WIDTH-8] : '0;
 
 //FIFO LOGIC    
 always_ff @(posedge clk or negedge rst_n) begin

@@ -1,11 +1,12 @@
+import packet_pkg::*;
 module output_mux (
-    input logic [1:0]  mux_sel,
-    input logic [15:0] data_in0,
-    input logic [15:0] data_in1,
-    input logic [15:0] data_in2,
-    input logic [15:0] data_in3,
+    input logic [($clog2(ADDR_WIDTH) - 1) : 0]  mux_sel,
+    input logic [(DATA_WIDTH - 1) : 0] data_in0,
+    input logic [(DATA_WIDTH - 1) : 0] data_in1,
+    input logic [(DATA_WIDTH - 1) : 0] data_in2,
+    input logic [(DATA_WIDTH - 1) : 0] data_in3,
     input logic arb_active,
-    output logic [15:0] data_out,
+    output logic [(DATA_WIDTH - 1) : 0] data_out,
     output logic valid_out        
 );
     // 4:1 MUX to select data output based on arbiter mux_select

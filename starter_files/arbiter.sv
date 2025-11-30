@@ -1,15 +1,14 @@
-module arbiter #(
-    parameter dst_size = 4
-)(
+import packet_pkg::*;
+module arbiter (
     input  logic       clk,
     input  logic       rst_n,
 
     // Inputs: One-hot target masks from each port
     // port0_dst[1] = 1 means Port 0 wants to go to Output 1
-    input  logic [dst_size-1:0] port0_dst, 
-    input  logic [dst_size-1:0] port1_dst,
-    input  logic [dst_size-1:0] port2_dst,
-    input  logic [dst_size-1:0] port3_dst,
+    input  logic [ADDR_WIDTH-1:0] port0_dst, 
+    input  logic [ADDR_WIDTH-1:0] port1_dst,
+    input  logic [ADDR_WIDTH-1:0] port2_dst,
+    input  logic [ADDR_WIDTH-1:0] port3_dst,
 
     // Outputs: 1 Grant bit per port (All-or-Nothing)
     // [0]=Port0 Grant, [1]=Port1 Grant...

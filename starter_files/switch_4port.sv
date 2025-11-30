@@ -1,9 +1,4 @@
-`include "port_if.sv"
-`include "arbiter.sv"
-`include "switch_port.sv"
-`include "output_mux.sv" 
-`define DATA_WIDTH 16
-`define ADDR_WIDTH 4
+import packet_pkg::*;
 
 module switch_4port (input logic clk, input logic rst_n,
   port_if port0, port_if port1, port_if port2, port_if port3);
@@ -117,8 +112,8 @@ output_mux mux0_i (
     .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
     .arb_active   (active0),
   //outputs
-    .data_out     (data_out_mux),
-    .valid_out    (valid_out0)
+    .data_out     ({port0.data_out, port0.target_out, port0.source_out}),
+    .valid_out    (port0.valid_out)
 );
 
 output_mux mux1_i (
@@ -130,8 +125,8 @@ output_mux mux1_i (
     .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
     .arb_active   (active1),
   //outputs
-    .data_out     (data_out_mux),
-    .valid_out    (valid_out1)
+    .data_out     ({port1.data_out, port1.target_out, port1.source_out}),
+    .valid_out    (port1.valid_out)
 );
 
 output_mux mux2_i (
@@ -143,8 +138,8 @@ output_mux mux2_i (
     .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
     .arb_active   (active2),
   //outputs
-    .data_out     (data_out_mux),
-    .valid_out    (valid_out2)
+    .data_out     ({port2.data_out, port2.target_out, port2.source_out}),
+    .valid_out    (port2.valid_out)
 );
 
 output_mux mux3_i (
@@ -156,8 +151,8 @@ output_mux mux3_i (
     .data_in3     ({port3.data_out, port3.target_out, port3.source_out}),
     .arb_active   (active3),
   //outputs
-    .data_out     (data_out_mux),
-    .valid_out    (valid_out3)
+    .data_out     ({port3.data_out, port3.target_out, port3.source_out}),
+    .valid_out    (port3.valid_out)
 );
 
 endmodule

@@ -1,6 +1,8 @@
+import packet_pkg::*;
+
 module parser (
-    input  logic [3:0] source,
-    input  logic [3:0] target,
+    input  logic [ADDR_WIDTH - 1:0] source,
+    input  logic [ADDR_WIDTH - 1:0] target,
     
     output p_type      pkt_type,
     output logic       pkt_valid

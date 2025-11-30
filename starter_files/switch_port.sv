@@ -1,12 +1,4 @@
-`include "FIFO.sv"
-`include "parser.sv"
-
-
-// IDLE - 00 , ROUTE - 01 , ARB_WAIT - 10 , TRANSMIT - 11
-typedef enum logic [1:0] {IDLE, ROUTE, ARB_WAIT, TRANSMIT} state;
-// Packet Type Encoding ERR - 00 , SDP - 01 , MDP - 10 , BDP - 11
-typedef enum logic [1:0] {ERR, SDP, MDP, BDP} p_type;
-
+import packet_pkg::*;
 
 module switch_port (
   input  logic        clk,
@@ -50,7 +42,7 @@ assign pkt_dst = header_out[3:0]; //target for arbiter
 assign fifo_pop = grant; // grant from arbiter enables read
 assign fifo_data_out = {data_out, target_out, source_out};
 //fifo instance
-fifo #(.PKT_SIZE(16),.DEPTH(8)) port_fifo (
+fifo port_fifo (
   //inputs
     .rst_n      (rst_n),
     .clk        (clk),
