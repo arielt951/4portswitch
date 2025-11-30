@@ -11,6 +11,7 @@ module switch_port (
   //4:1 mux interface  
   output logic [3:0] pkt_dst, //to arbiter
   output logic [15:0] fifo_data_out
+  //output logic valid_out
 
 ); 
 logic fifo_full;
@@ -18,7 +19,7 @@ logic fifo_empty;
 logic [7:0] header_out;
 
 // State Encoding
-state current_state, next_state;
+state_t current_state, next_state;
 p_type Packet_Type;
 // Internal signals for Parser connection
 p_type pkt_type;
@@ -75,7 +76,7 @@ end
 always_comb begin
     // Default assignments to prevent latches
     next_state      = current_state;
-    valid_out       = 1'b0; // Don't output data unless transmitting
+    //valid_out       = 1'b0; // Don't output data unless transmitting
     fifo_pop        = 1'b0;
     
     case (current_state)

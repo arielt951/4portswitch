@@ -25,7 +25,6 @@ switch_port port0_i (
   .grant        (grant[0]), 
   //outputs
   .pkt_dst      (port0_dst),
-  .valid_out    (valid_out0),
   .fifo_data_out(fifo_data_out0)
 ); 
 
@@ -40,7 +39,6 @@ switch_port port1_i (
   .grant        (grant[1]),
   //outputs
   .pkt_dst      (port1_dst),
-  .valid_out    (valid_out1),
   .fifo_data_out(fifo_data_out1)
 ); 
 
@@ -55,7 +53,6 @@ switch_port port2_i (
   .grant        (grant[2]),
   //outputs
   .pkt_dst      (port2_dst),
-  .valid_out    (valid_out2),
   .fifo_data_out(fifo_data_out2)
 ); 
 
@@ -70,7 +67,6 @@ switch_port port3_i (
   .grant        (grant[3]),
   //outputs
   .pkt_dst      (port3_dst),
-  .valid_out    (valid_out3),
   .fifo_data_out(fifo_data_out3)
 ); 
 
