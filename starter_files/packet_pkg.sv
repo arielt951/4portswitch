@@ -9,11 +9,20 @@ typedef enum logic [1:0] {IDLE, ROUTE, ARB_WAIT, TRANSMIT} state;
 // Packet Type Encoding ERR - 00 , SDP - 01 , MDP - 10 , BDP - 11
 typedef enum logic [1:0] {ERR, SDP, MDP, BDP} p_type;
 
-typedef struct packed {
-    logic [3:0] source;
-    logic [3:0] target;
-    logic [7:0] data;
-} packet;
+
+    // --- Packet Class (For Verification/Testbench Only) ---
+    // This matches the usage in port_if.sv
+    class packet;
+        rand logic [3:0] source;
+        rand logic [3:0] target;
+        rand logic [7:0] data;
+        string name;
+
+        // Constructor required because port_if calls new("monitored")
+        function new(string name = "packet_obj");
+            this.name = name;
+        endfunction
+    endclass
 
   //`include "packet_data.sv"
   //`include "component_base.sv"
