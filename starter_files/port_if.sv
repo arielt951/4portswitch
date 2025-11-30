@@ -1,4 +1,6 @@
+
 interface port_if (input bit clk, input bit rst_n);
+  import packet_pkg::*;
   logic        valid_in;
   logic [3:0]  source_in;
   logic [3:0]  target_in;

@@ -9,7 +9,7 @@ module switch_4port (input logic clk, input logic rst_n,
   logic arb_active;
   logic active0, active1, active2, active3; 
   logic valid_out0, valid_out1, valid_out2, valid_out3;
-  logic [ADDR_WIDTH - 1:0] fifo_data_out0, fifo_data_out1, fifo_data_out2, fifo_data_out3;
+  logic [DATA_WIDTH - 1:0] fifo_data_out0, fifo_data_out1, fifo_data_out2, fifo_data_out3;
 
 // Use parameters and DEFINE
 // Modular design with wiring

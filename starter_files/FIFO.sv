@@ -26,7 +26,7 @@ logic [PTR_BWIDTH : 0] fifo_count;
 assign header_out = (!fifo_empty) ? mem[rd_ptr][7:0] : '0; 
 
 //FIFO LOGIC    
-always_ff @(posedge clk or negedge rst_n) begins
+always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
     wr_ptr     <=  '0;
     rd_ptr     <=  '0;
