@@ -10,7 +10,7 @@ module switch_4port (input logic clk, input logic rst_n,
   logic active0, active1, active2, active3; 
   logic valid_out0, valid_out1, valid_out2, valid_out3;
   logic [DATA_WIDTH - 1:0] fifo_data_out0, fifo_data_out1, fifo_data_out2, fifo_data_out3;
-
+  logic [ADDR_WIDTH - 1:0] port_reqs;
 // Use parameters and DEFINE
 // Modular design with wiring
 
@@ -25,7 +25,8 @@ switch_port port0_i (
   .grant        (grant[0]), 
   //outputs
   .pkt_dst      (port0_dst),
-  .fifo_data_out(fifo_data_out0)
+  .fifo_data_out(fifo_data_out0),
+  .port_req		(port_reqs[0])
 ); 
 
 switch_port port1_i (
@@ -39,7 +40,9 @@ switch_port port1_i (
   .grant        (grant[1]),
   //outputs
   .pkt_dst      (port1_dst),
-  .fifo_data_out(fifo_data_out1)
+  .fifo_data_out(fifo_data_out1),
+  .port_req		(port_reqs[1])
+  
 ); 
 
 switch_port port2_i (
@@ -53,7 +56,8 @@ switch_port port2_i (
   .grant        (grant[2]),
   //outputs
   .pkt_dst      (port2_dst),
-  .fifo_data_out(fifo_data_out2)
+  .fifo_data_out(fifo_data_out2),
+  .port_req		(port_reqs[2])
 ); 
 
 switch_port port3_i (
@@ -67,7 +71,9 @@ switch_port port3_i (
   .grant        (grant[3]),
   //outputs
   .pkt_dst      (port3_dst),
-  .fifo_data_out(fifo_data_out3)
+  .fifo_data_out(fifo_data_out3),
+  .port_req		(port_reqs[3])
+  
 ); 
 
 arbiter top_arb_i (
@@ -78,6 +84,7 @@ arbiter top_arb_i (
   .port1_dst    (port1_dst),
   .port2_dst    (port2_dst),
   .port3_dst    (port3_dst),
+  .port_reqs	(port_reqs),
   //outputs
   .grant_bus    (grant),
   .mux_sel0     (mux_sel0),

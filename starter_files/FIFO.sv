@@ -23,8 +23,9 @@ logic [PTR_BWIDTH -1 : 0] wr_ptr, rd_ptr;
 logic [PTR_BWIDTH : 0] fifo_count;
 
 //inspection logic for packet parser no matter of arbitration granted, we need to inspect the header
-assign header_out = (!fifo_empty) ? mem[rd_ptr][7:0] : '0; 
-
+ always_comb begin
+ 	header_out = (!fifo_empty) ? mem[rd_ptr][7:0] : '0; 
+ end
 //FIFO LOGIC    
 always_ff @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin

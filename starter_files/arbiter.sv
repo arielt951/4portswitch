@@ -2,6 +2,8 @@ import packet_pkg::*;
 module arbiter (
     input  logic       clk,
     input  logic       rst_n,
+	
+	input logic [3:0] port_reqs,
 
     // Inputs: One-hot target masks from each port
     // port0_dst[1] = 1 means Port 0 wants to go to Output 1
@@ -106,28 +108,28 @@ module arbiter (
     
     always @(*) begin
         // Port 0 Grant
-        grant_bus[0] = (|port0_dst) &&
+        grant_bus[0] = (port_reqs[0]) && (|port0_dst) &&
                        (!port0_dst[0] || win_out0[0]) &&
                        (!port0_dst[1] || win_out1[0]) &&
                        (!port0_dst[2] || win_out2[0]) &&
                        (!port0_dst[3] || win_out3[0]);
 
         // Port 1 Grant
-        grant_bus[1] = (|port1_dst) &&
+        grant_bus[1] = (port_reqs[1]) && (|port1_dst) &&
                        (!port1_dst[0] || win_out0[1]) &&
                        (!port1_dst[1] || win_out1[1]) &&
                        (!port1_dst[2] || win_out2[1]) &&
                        (!port1_dst[3] || win_out3[1]);
 
         // Port 2 Grant
-        grant_bus[2] = (|port2_dst) &&
+        grant_bus[2] = (port_reqs[2]) && (|port2_dst) &&
                        (!port2_dst[0] || win_out0[2]) &&
                        (!port2_dst[1] || win_out1[2]) &&
                        (!port2_dst[2] || win_out2[2]) &&
                        (!port2_dst[3] || win_out3[2]);
 
         // Port 3 Grant
-        grant_bus[3] = (|port3_dst) &&
+        grant_bus[3] = (port_reqs[3]) && (|port3_dst) &&
                        (!port3_dst[0] || win_out0[3]) &&
                        (!port3_dst[1] || win_out1[3]) &&
                        (!port3_dst[2] || win_out2[3]) &&

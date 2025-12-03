@@ -229,9 +229,9 @@ TclAutoSource =
 cmd_enter_form = FALSE
 SyncBrowserDir = TRUE
 FindBarVisible = 
+recent_commands_nWave = nextEvent,previousEvent,getSignal,editCut
 ColorThemeModern = bright
 version = Verdi_X-2025.06-1
-recent_commands_nWave = nextEvent,previousEvent,getSignal,editCut
 prevColorThemeModern = bright
 SignalCaseInSensitive = FALSE
 [GlobalProp]
@@ -385,7 +385,7 @@ savePropStat = FALSE
 savePropDtl = TRUE
 [QtDialog]
 qWaveSignalDialog = 201,104,1239,572
-QwUserAskDlg = 805,562,324,128
+QwUserAskDlg = 477,257,324,128
 [Safety]
 RegisterObject = ID_RED4
 CoreObject = ID_ORANGE5
@@ -588,7 +588,7 @@ pdmlMacro = ID_BLACK
 font = COURIER12
 annotFont = FIXED12
 [Text.1]
-viewport = 0 24 1954 1283 45
+viewport = 0 24 1278 651 45
 [TextPrinter]
 Orientation = Landscape
 Indicator = FALSE
@@ -686,38 +686,38 @@ isHidden = TRUE
 isUserChangeColumnVisible = FALSE
 isColFilterColorCoding = FALSE
 [VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column1]
-name = "Time"
+name = "Severity"
 width = 60
-visualIndex = 0
+visualIndex = 2
 isHidden = FALSE
 isUserChangeColumnVisible = FALSE
 isColFilterColorCoding = FALSE
 [VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column2]
-name = "Message"
-width = 2000
-visualIndex = 5
-isHidden = FALSE
-isUserChangeColumnVisible = FALSE
-isColFilterColorCoding = FALSE
-[VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column3]
-name = "Code"
-width = 60
-visualIndex = 3
-isHidden = TRUE
-isUserChangeColumnVisible = FALSE
-isColFilterColorCoding = FALSE
-[VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column4]
 name = "Type"
 width = 60
 visualIndex = 4
 isHidden = TRUE
 isUserChangeColumnVisible = FALSE
 isColFilterColorCoding = FALSE
-[VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column5]
-name = "Severity"
+[VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column3]
+name = "Time"
 width = 60
-visualIndex = 2
+visualIndex = 0
 isHidden = FALSE
+isUserChangeColumnVisible = FALSE
+isColFilterColorCoding = FALSE
+[VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column4]
+name = "Message"
+width = 2000
+visualIndex = 5
+isHidden = FALSE
+isUserChangeColumnVisible = FALSE
+isColFilterColorCoding = FALSE
+[VIA.oneSearch.preference.vgifColumnSettingRC.setting0.column5]
+name = "Code"
+width = 60
+visualIndex = 3
+isHidden = TRUE
 isUserChangeColumnVisible = FALSE
 isColFilterColorCoding = FALSE
 [VIA.ruleHistory]
@@ -797,7 +797,7 @@ scope_to_save_with_macro
 open_file_dir
 open_rc_file_dir
 getSignalForm = 202 133 1239 572 295 482 700 115
-viewPort = 0 11 1954 381 152 108
+viewPort = 0 11 1278 381 152 108
 legendBackground = -c ID_BLACK
 valueBackground = -c ID_BLACK
 curveBackground = -c ID_BLACK
@@ -1600,7 +1600,7 @@ AddImportArgument = FALSE
 LineBreakWithScope = TRUE
 StopAfterCompileOption = -s
 [wave.0]
-viewPort = 0 11 1954 381 152 108
+viewPort = 0 11 1278 381 152 108
 [wave.1]
 viewPort = 127 219 960 332 100 65
 [wave.2]

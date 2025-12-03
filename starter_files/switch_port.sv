@@ -10,8 +10,9 @@ module switch_port (
   input  logic        grant,
   //4:1 mux interface  
   output logic [3:0] pkt_dst, //to arbiter
-  output logic [15:0] fifo_data_out
+  output logic [15:0] fifo_data_out,
   //output logic valid_out
+  output logic port_req
 
 ); 
 logic fifo_full;
@@ -30,13 +31,13 @@ logic fifo_pop , read_en_fifo;
 // Parser Instantiation
 parser parser_inst (
     //inputs
-    .source    (header_out[7:4]), 
-    .target    (header_out[3:0]), 
+    .source    (header_out[3:0]), 
+    .target    (header_out[7:4]), 
     //outputs
     .pkt_type  (pkt_type),
     .pkt_valid (pkt_valid)
 );
-assign pkt_dst = header_out[3:0]; //target for arbiter
+assign pkt_dst = header_out[7:4]; //target for arbiter
 
 //fifo instance
 fifo port_fifo (
@@ -78,6 +79,7 @@ always_comb begin
     next_state      = current_state;
     //valid_out       = 1'b0; // Don't output data unless transmitting
     fifo_pop        = 1'b0;
+	port_req = 1'b0;
     
     case (current_state)
         
@@ -114,6 +116,7 @@ always_comb begin
         // -----------------------------------------------------------------
         ARB_WAIT: begin
             // In Stage A (QA), you might force 'grant' to 1 in your testbench.
+			port_req = 1'b1;
             if (grant) begin
                 next_state = TRANSMIT;
             end
@@ -126,6 +129,7 @@ always_comb begin
         // Drive data out and pop FIFO
         // -----------------------------------------------------------------
         TRANSMIT: begin
+			port_req = 1'b0;
             next_state = IDLE;      // Return to IDLE
         end 
 

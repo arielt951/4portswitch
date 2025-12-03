@@ -10,8 +10,8 @@ module parser (
 
     always_comb begin
         // 1. Default assignments
-        pkt_type  = ERR;
-        pkt_valid = 1'b0;
+        //pkt_type  = ERR;
+        //pkt_valid = 1'b0;
 
         // 2. Check Source Validity (Must be One-Hot)
         if ($countones(source) == 1 && target != 4'b0000) begin
