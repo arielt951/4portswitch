@@ -88,10 +88,10 @@ module arbiter (
         win_out2 = pick_winner(reqs_out2, ptr2);
         win_out3 = pick_winner(reqs_out3, ptr3);
 
-        active0 = |win_out0; // Reduction OR: returns 1 if any bit is 1
-        active1 = |win_out1;
-        active2 = |win_out2;
-        active3 = |win_out3;
+        active0  = (|win_out0)  & |grant_bus; // Reduction OR: returns 1 if any bit is 1
+        active1  = (|win_out1 ) & |grant_bus;
+        active2  = (|win_out2 ) & |grant_bus;
+        active3  = (|win_out3 ) & |grant_bus;
 
         // C. Encode Mux Selects (Map One-Hot to 2-bit Binary)
         mux_sel0 = (win_out0[1]) ? 2'd1 : (win_out0[2]) ? 2'd2 : (win_out0[3]) ? 2'd3 : 2'd0;

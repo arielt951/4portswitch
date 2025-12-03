@@ -26,115 +26,116 @@ p_type Packet_Type;
 p_type pkt_type;
 logic  pkt_valid;
 // internal control wire which connects between the fifo, arbiter and FSM
-logic fifo_pop , read_en_fifo;
-    
+//logic fifo_pop , read_en_fifo;
+  logic read_en_fifo;  
 // Parser Instantiation
 parser parser_inst (
-    //inputs
-    .source    (header_out[3:0]), 
-    .target    (header_out[7:4]), 
-    //outputs
-    .pkt_type  (pkt_type),
-    .pkt_valid (pkt_valid)
+	//inputs
+	.source    (header_out[3:0]), 
+	.target    (header_out[7:4]), 
+	//outputs
+	.pkt_type  (pkt_type),
+	.pkt_valid (pkt_valid)
 );
 assign pkt_dst = header_out[7:4]; //target for arbiter
 
 //fifo instance
 fifo port_fifo (
   //inputs
-    .rst_n      (rst_n),
-    .clk        (clk),
-    .data_in    ({data_in, target_in, source_in}),
-    .wr_en      (valid_in),
-    .rd_en      (read_en_fifo), // grant from arbiter enables read
-    //outputs
-    .data_out   (fifo_data_out),
-    .fifo_full  (fifo_full),
-    .header_out (header_out), // for parser
-    .fifo_empty (fifo_empty)
+	.rst_n      (rst_n),
+	.clk        (clk),
+	.data_in    ({data_in, target_in, source_in}),
+	.wr_en      (valid_in),
+	.rd_en      (read_en_fifo), // grant from arbiter enables read
+	//outputs
+	.data_out   (fifo_data_out),
+	.fifo_full  (fifo_full),
+	.header_out (header_out), // for parser
+	.fifo_empty (fifo_empty)
 );
-assign read_en_fifo = (grant || fifo_pop);
-
+//assign read_en_fifo = (grant || fifo_pop);
 // Implement FSM for packet flow
 // -----------------------------------------------------------
 // FSM LOGIC
 // -----------------------------------------------------------
 // 1. Sequential Logic: State Updates
 always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        current_state <= IDLE;
-        Packet_Type   <= ERR; // Reset packet type
-    end else begin
-        current_state <= next_state;
-        // Latch Packet_Type only when we decide the packet is valid in ROUTE state
-        if (current_state == ROUTE && pkt_valid) begin
-            Packet_Type <= pkt_type;
-        end
-    end
+	if (!rst_n) begin
+		current_state <= IDLE;
+		Packet_Type   <= ERR; // Reset packet type
+	end else begin
+		current_state <= next_state;
+		// Latch Packet_Type only when we decide the packet is valid in ROUTE state
+		if (current_state == ROUTE && pkt_valid) begin
+			Packet_Type <= pkt_type;
+		end
+	end
 end
 
 // 2. Combinational Logic: Next State & Outputs
 always_comb begin
-    // Default assignments to prevent latches
-    next_state      = current_state;
-    //valid_out       = 1'b0; // Don't output data unless transmitting
-    fifo_pop        = 1'b0;
+	// Default assignments to prevent latches
+	next_state      = current_state;
+	//valid_out       = 1'b0; // Don't output data unless transmitting
+	//fifo_pop        = 1'b0;
 	port_req = 1'b0;
-    
-    case (current_state)
-        
-        // -----------------------------------------------------------------
-        // STATE: IDLE
-        // Wait for data to arrive in FIFO
-        // -----------------------------------------------------------------
-        IDLE: begin
-            if (!fifo_empty) begin
-                next_state = ROUTE;
-            end else begin
-                next_state = IDLE;
-            end
-        end
+	read_en_fifo = 1'b0;
+	
+	case (current_state)
+		
+		// -----------------------------------------------------------------
+		// STATE: IDLE
+		// Wait for data to arrive in FIFO
+		// -----------------------------------------------------------------
+		IDLE: begin
+			if (!fifo_empty) begin
+				next_state = ROUTE;
+			end else begin
+				next_state = IDLE;
+			end
+		end
 
-        // -----------------------------------------------------------------
-        // STATE: ROUTE
-        // Check Parser output. If valid -> Wait for Grant. If Bad -> Drop.
-        // -----------------------------------------------------------------
-        ROUTE: begin
-            if (pkt_valid) begin
-                // Valid packet: Move to Arbitration Wait
-                next_state = ARB_WAIT; 
-            end else begin
-                // Invalid packet: Drop it!
-                fifo_pop = 1'b1;
-                next_state = IDLE;
-            end
-        end
+		// -----------------------------------------------------------------
+		// STATE: ROUTE
+		// Check Parser output. If valid -> Wait for Grant. If Bad -> Drop.
+		// -----------------------------------------------------------------
+		ROUTE: begin
+			if (pkt_valid) begin
+				// Valid packet: Move to Arbitration Wait
+				next_state = ARB_WAIT; 
+			end else begin
+				// Invalid packet: Drop it!
+				read_en_fifo = 1'b1;
+				next_state = IDLE;
+			end
+		end
 
-        // -----------------------------------------------------------------
-        // STATE: ARB_WAIT
-        // Wait for external arbiter to grant permission
-        // -----------------------------------------------------------------
-        ARB_WAIT: begin
-            // In Stage A (QA), you might force 'grant' to 1 in your testbench.
+		// -----------------------------------------------------------------
+		// STATE: ARB_WAIT
+		// Wait for external arbiter to grant permission
+		// -----------------------------------------------------------------
+		ARB_WAIT: begin
+			// In Stage A (QA), you might force 'grant' to 1 in your testbench.
 			port_req = 1'b1;
-            if (grant) begin
-                next_state = TRANSMIT;
-            end
-            else begin
-                next_state = ARB_WAIT;
-        end
-        end
-        // -----------------------------------------------------------------
-        // STATE: TRANSMIT
-        // Drive data out and pop FIFO
-        // -----------------------------------------------------------------
-        TRANSMIT: begin
+			if (grant) begin
+				next_state = TRANSMIT;
+				read_en_fifo = 1'b1; // Pop FIFO on transmit
+			end
+			else begin
+				next_state = ARB_WAIT;
+		end
+		end
+		// -----------------------------------------------------------------
+		// STATE: TRANSMIT
+		// Drive data out and pop FIFO
+		// -----------------------------------------------------------------
+		TRANSMIT: begin
 			port_req = 1'b0;
-            next_state = IDLE;      // Return to IDLE
-        end 
+			next_state = IDLE;      // Return to IDLE
+		end 
 
-        default: next_state = IDLE;
-    endcase
+		default: next_state = IDLE;
+	endcase
 end
 // Handle clock/reset
 // Implement routing logic

@@ -107,7 +107,7 @@ output_mux mux0_i (
     .data_in3     (fifo_data_out3),
     .arb_active   (active0),
   //outputs
-    .data_out     ({port0.data_out, port0.target_out, port0.source_out}),
+    .data_out     (port0.data_out),
     .valid_out    (port0.valid_out)
 );
 
@@ -120,7 +120,7 @@ output_mux mux1_i (
     .data_in3     (fifo_data_out3),
     .arb_active   (active1),
   //outputs
-    .data_out     ({port1.data_out, port1.target_out, port1.source_out}),
+    .data_out     (port1.data_out),
     .valid_out    (port1.valid_out)
 );
 
@@ -133,7 +133,7 @@ output_mux mux2_i (
     .data_in3     (fifo_data_out3),
     .arb_active   (active2),
   //outputs
-    .data_out     ({port2.data_out, port2.target_out, port2.source_out}),
+    .data_out     (port2.data_out),
     .valid_out    (port2.valid_out)
 );
 
@@ -146,7 +146,7 @@ output_mux mux3_i (
     .data_in3     (fifo_data_out3),
     .arb_active   (active3),
   //outputs
-    .data_out     ({port3.data_out, port3.target_out, port3.source_out}),
+    .data_out     (port3.data_out),
     .valid_out    (port3.valid_out)
 );
 
